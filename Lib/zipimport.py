@@ -256,18 +256,22 @@ class zipimporter(_bootstrap_external._LoaderBasics):
 
 
     def get_resource_reader(self, fullname):
-        """Return the ResourceReader for a package in a zip file.
+        """Return the ResourceReader for a package/module in a zip file.
 
-        If 'fullname' is a package within the zip file, return the
+        If 'fullname' is a package or a module within a package within the zip file, return the
         'ResourceReader' object for the package.  Otherwise return None.
         """
         try:
-            if not self.is_package(fullname):
+            if self.is_package(fullname):
+                package = fullname
+            elif self.is_package("."):
+                package = "."
+            else:
                 return None
         except ZipImportError:
             return None
         from importlib.readers import ZipReader
-        return ZipReader(self, fullname)
+        return ZipReader(self, package)
 
 
     def _get_files(self):
@@ -307,7 +311,7 @@ _zip_searchorder = (
 # Given a module name, return the potential file path in the
 # archive (without extension).
 def _get_module_path(self, fullname):
-    return self.prefix + fullname.rpartition('.')[2]
+    return (self.prefix + fullname.rpartition('.')[2]).rstrip(path_sep)
 
 # Does this path represent a directory?
 def _is_dir(self, path):

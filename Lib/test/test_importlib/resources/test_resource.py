@@ -134,6 +134,27 @@ class ResourceFromZipsTest02(util.ZipSetupBase, unittest.TestCase):
         )
 
 
+class ResourceFromZipsTest04(util.ZipSetupBase, unittest.TestCase):
+    ZIP_MODULE = 'data04'
+
+    def test_package_resources(self):
+        self.assertEqual(
+            names(resources.files('data04.package')),
+            {'__init__.py', 'module.py', 'resource.txt'},
+        )
+
+    def test_resources_of_module_inside_package(self):
+        """
+        A module inside a package can have resources found adjacent to the module.
+        """
+        package_files = resources.files('data04.package.module')
+        self.assertEqual(
+            names(package_files),
+            {'__init__.py', 'module.py', 'resource.txt'},
+        )
+        self.assertEqual(package_files.joinpath('resource.txt').read_text(), 'data\n')
+
+
 class DeletingZipsTest(util.ZipSetupBase, unittest.TestCase):
     """Having accessed resources in a zip file should not keep an open
     reference to the zip.
